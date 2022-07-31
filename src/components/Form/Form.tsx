@@ -3,9 +3,11 @@ import { Input } from '..';
 import { IFormState, IInputProps } from './Form.props';
 import { isValid } from './validateInfo';
 import styles from './Form.styles.scss';
+import { registration } from '../../service/service';
 
 export const Form = (): JSX.Element => {
 	const [checkFormValid, setCheckFormValid] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
 	const [values, setValues] = useState<IFormState>({
 		username: {
 			name: 'username',
@@ -39,7 +41,7 @@ export const Form = (): JSX.Element => {
 		},
 		telephone: {
 			name: 'telephone',
-			value: undefined,
+			value: 0,
 			type: 'number',
 			placeholder: '+7(495)000-00-00',
 			errorMessage: 'Нужно ввести именно российский номер телефона!',
@@ -59,13 +61,50 @@ export const Form = (): JSX.Element => {
 		},
 	});
 
-	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
+	const checkForm = () => {
+		Object.keys(values).forEach((name) => {
+			if (!values[name].valide && values[name].touched) {
+				setCheckFormValid(true);
+			} else {
+				values[name].valide = true;
+				values[name].touched = true;
+				alert('Заполните форму');
+				setCheckFormValid(false);
+				return;
+			}
+		});
 	};
+
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		checkForm();
+		if (checkFormValid) {
+			const { username, email, birthday, message, telephone } = values;
+			const data = {
+				username: username.value,
+				email: email.value,
+				birthday: birthday.value,
+				telephone: +telephone.value,
+				message: message.value,
+			};
+
+			try {
+				setLoading(true);
+				const res = await registration(data);
+				console.log('result>>>', res);
+				setLoading(false);
+			} catch (e) {
+				console.log(e);
+				setLoading(false);
+			}
+		} else {
+			return;
+		}
+	};
+
 	const onChange = (e: ChangeEvent<HTMLInputElement>, input: IInputProps['name']) => {
 		const copyValues = { ...values };
 		const control = copyValues[input];
-		console.log('onChange>>', input, e.target.value);
 		if (input === 'username') {
 			control.value = e.target.value.toUpperCase();
 		} else {
@@ -73,12 +112,15 @@ export const Form = (): JSX.Element => {
 		}
 		control.touched = true;
 		control.valide = isValid(control.value, input);
+		console.log('reg>>>', isValid(control.value, input));
+		/*
 		let isFormValid = true;
 		Object.keys(copyValues).forEach((name) => {
-			isFormValid = copyValues[name].valide && isFormValid;
+			isFormValid = !copyValues[name].valide && isFormValid;
 		});
+		*/
 		setValues(copyValues);
-		setCheckFormValid(isFormValid);
+		//setCheckFormValid(isFormValid);
 	};
 
 	const renderInputs = () => {
@@ -93,9 +135,12 @@ export const Form = (): JSX.Element => {
 			<form onSubmit={handleSubmit}>
 				{renderInputs()}
 				<div>
-					<button className={styles.btn}>Submit</button>
+					<button disabled={loading ? true : false} className={styles.btn}>
+						Submit
+					</button>
 				</div>
 			</form>
+			<div className={styles.message}>Форма отправлена успешно!</div>
 		</div>
 	);
 };

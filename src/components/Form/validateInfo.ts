@@ -2,22 +2,27 @@ import { ChangeEvent } from 'react';
 import InputMask from 'react-input-mask';
 
 const rule = {
+	validName: /^([A-Z-А-ЯЁ]){3,30}\s{1}([A-Z-А-ЯЁ|\-]){3,30}$/,
 	validEmail: /^([a-z0-9_\.-]+)@([a-z0-9_\.-]+)\.([a-z\.]{2,6})$/,
+	validBirthday: /^(\d{4}\-\d{2}\-\d{2})$/,
 };
 
 export const isValid = (value: string, inputName: string): boolean => {
 	if (!value) {
-		return false;
+		return true;
 	}
 	try {
 		switch (inputName) {
 			case 'username':
-				console.log(value);
-				console.log(checkName(value));
-				return checkName(value);
+				return !rule.validName.test(value);
 			case 'email':
-				return value.length > 0 && !rule.validEmail.test(value);
+				return !rule.validEmail.test(value);
+			case 'message':
+				return !(value.length > 9 && value.length < 301);
 			case 'telephone':
+				return false;
+			case 'birthday':
+				return !rule.validBirthday.test(value);
 		}
 	} catch {
 		alert('Что-то пошло не так, Пересмотрите заполнение формы, возможно, это всё из-за вас!');
@@ -36,14 +41,12 @@ const checkName = (val: string): boolean => {
 	const second = newStr[1][0];
 	if (first === ' ' || second === ' ') {
 		result = true;
-	} else if (
-		newStr[0].length < 3 ||
-		newStr[0].length > 31 ||
-		newStr[1].length < 3 ||
-		newStr[1].length > 31
-	) {
-		result = true;
 	}
+	newStr.forEach((item) => {
+		if (item.length < 3 || item.length > 31) {
+			result = true;
+		}
+	});
 	return result;
 };
 

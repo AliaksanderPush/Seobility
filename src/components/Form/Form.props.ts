@@ -16,3 +16,11 @@ export interface IInputProps {
 	valide: boolean;
 	touched: boolean;
 }
+
+export interface IUserDto {
+	username: string | number;
+	email: string | number;
+	birthday: string | number;
+	telephone: string | number;
+	message: string | number;
+}
