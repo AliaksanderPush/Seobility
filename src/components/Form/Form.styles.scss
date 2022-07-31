@@ -1,0 +1,17 @@
+.form_contaner {
+	display: flex;
+	flex-direction: column;
+
+	.btn {
+		width: 280px;
+		height: 40px;
+		border-radius: 4px;
+		background: orangered;
+		color: #fff;
+		font-size: 20px;
+		border: none;
+	}
+	.btn:hover {
+		background: rgb(247, 100, 46);
+	}
+}

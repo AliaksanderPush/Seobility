@@ -1,0 +1,12 @@
+.header_container {
+	width: 100%;
+	height: 60px;
+	background-color: black;
+	display: flex;
+	justify-content: center;
+	.header_text {
+		color: #fff;
+		line-height: 60px;
+		font-size: 32px;
+	}
+}

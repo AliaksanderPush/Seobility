@@ -1,8 +1,9 @@
-const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+const production = process.env.NODE_ENV === 'production';
 
 module.exports = {
 	entry: './src/index.tsx',
@@ -16,35 +17,31 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /\.bundle\.ts$/,
-				use: {
-					loader: 'bundle-loader',
-					options: {
-						name: '[name]',
-					},
-				},
-			},
-			{
-				test: /\.tsx?$/,
-				use: 'ts-loader',
+				test: /\.(ts|js)x?$/,
 				exclude: /node_modules/,
-			},
-			{
-				test: /\.s?css$/,
 				use: [
 					{
-						loader: MiniCssExtractPlugin.loader,
+						loader: 'babel-loader',
 					},
+				],
+			},
+
+			{
+				test: /\.s(a|c)ss$/,
+				exclude: /node_modules/,
+				use: [
+					production ? MiniCssExtractPlugin.loader : 'style-loader',
 					{
 						loader: 'css-loader',
 						options: {
-							sourceMap: true,
+							modules: true,
+							sourceMap: !production,
 						},
 					},
 					{
 						loader: 'sass-loader',
 						options: {
-							sourceMap: true,
+							sourceMap: !production,
 						},
 					},
 				],
@@ -67,12 +64,16 @@ module.exports = {
 	plugins: [
 		new HtmlWebpackPlugin({
 			template: path.join(__dirname, 'src', 'index.html'),
+			favicon: './public/favicon.ico',
 		}),
 		new CleanWebpackPlugin(),
-		new MiniCssExtractPlugin(),
+		new MiniCssExtractPlugin({
+			filename: production ? '[name].[contenthash].css' : '[name].css',
+		}),
 	],
 	output: {
 		filename: '[name].js',
-		path: path.resolve(__dirname, 'dist'),
+		filename: production ? '[name].[contenthash].js' : '[name].js',
 	},
+	mode: production ? 'production' : 'development',
 };

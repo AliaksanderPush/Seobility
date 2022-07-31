@@ -1,0 +1,18 @@
+$var1: #212529;
+$var2: #fff;
+
+.footer {
+	margin-top: auto;
+	background: $var1;
+	color: white;
+	height: 58px;
+	text-align: center;
+	.footer_item {
+		background: $var1;
+		color: white;
+		line-height: 58px;
+	}
+	.footer_item a {
+		color: white;
+	}
+}

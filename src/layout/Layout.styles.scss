@@ -1,0 +1,10 @@
+.content_all {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	position: relative;
+	background: linear-gradient(270deg, #cef2fa 0%, #59bfef 100%);
+}
