@@ -8,7 +8,7 @@ export interface IFormState {
 
 export interface IInputProps {
 	name: string;
-	value: string | number;
+	value: string;
 	type: string;
 	placeholder: string;
 	errorMessage?: string;
@@ -18,9 +18,14 @@ export interface IInputProps {
 }
 
 export interface IUserDto {
-	username: string | number;
-	email: string | number;
-	birthday: string | number;
-	telephone: string | number;
-	message: string | number;
+	username: string;
+	email: string;
+	birthday: string;
+	telephone: string;
+	message: string;
+}
+
+export interface IMessage {
+	text: string;
+	status: boolean;
 }

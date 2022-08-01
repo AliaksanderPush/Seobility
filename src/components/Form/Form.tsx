@@ -1,13 +1,13 @@
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { Input } from '..';
-import { IFormState, IInputProps } from './Form.props';
+import { IFormState, IInputProps, IMessage } from './Form.props';
 import { isValid } from './validateInfo';
-import styles from './Form.styles.scss';
 import { registration } from '../../service/service';
+import styles from './Form.styles.scss';
 
 export const Form = (): JSX.Element => {
-	const [checkFormValid, setCheckFormValid] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
+	const [message, setMessage] = useState<IMessage>({ status: false, text: '' });
 	const [values, setValues] = useState<IFormState>({
 		username: {
 			name: 'username',
@@ -41,9 +41,9 @@ export const Form = (): JSX.Element => {
 		},
 		telephone: {
 			name: 'telephone',
-			value: 0,
-			type: 'number',
-			placeholder: '+7(495)000-00-00',
+			value: '',
+			type: 'text',
+			placeholder: '+(7,8,9)(000)000-00-00',
 			errorMessage: 'Нужно ввести именно российский номер телефона!',
 			label: 'Номер телефона',
 			valide: false,
@@ -62,65 +62,65 @@ export const Form = (): JSX.Element => {
 	});
 
 	const checkForm = () => {
+		let result = false;
 		Object.keys(values).forEach((name) => {
 			if (!values[name].valide && values[name].touched) {
-				setCheckFormValid(true);
+				result = true;
 			} else {
 				values[name].valide = true;
 				values[name].touched = true;
-				alert('Заполните форму');
-				setCheckFormValid(false);
-				return;
+				renderMessages('Заполните форму', false);
+				return false;
 			}
 		});
+		return result;
 	};
 
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		checkForm();
-		if (checkFormValid) {
+		const isFormvalid = checkForm();
+		if (isFormvalid) {
 			const { username, email, birthday, message, telephone } = values;
 			const data = {
 				username: username.value,
 				email: email.value,
 				birthday: birthday.value,
-				telephone: +telephone.value,
+				telephone: telephone.value,
 				message: message.value,
 			};
 
 			try {
 				setLoading(true);
 				const res = await registration(data);
-				console.log('result>>>', res);
 				setLoading(false);
+				if (res === 'success') {
+					renderMessages('Данные отправлены успешно 😊', true);
+					clearInputs();
+				} else {
+					const err: string[] = Object.values(res[0].constraints);
+					setLoading(false);
+					return renderMessages(err[0], false);
+				}
 			} catch (e) {
 				console.log(e);
 				setLoading(false);
 			}
 		} else {
-			return;
+			return renderMessages('Форма заполнена некорректно!', false);
 		}
 	};
 
-	const onChange = (e: ChangeEvent<HTMLInputElement>, input: IInputProps['name']) => {
+	const onChange = (value: string, input: IInputProps['name']) => {
 		const copyValues = { ...values };
 		const control = copyValues[input];
 		if (input === 'username') {
-			control.value = e.target.value.toUpperCase();
+			control.value = value.toUpperCase();
 		} else {
-			control.value = e.target.value;
+			control.value = value;
 		}
 		control.touched = true;
 		control.valide = isValid(control.value, input);
-		console.log('reg>>>', isValid(control.value, input));
-		/*
-		let isFormValid = true;
-		Object.keys(copyValues).forEach((name) => {
-			isFormValid = !copyValues[name].valide && isFormValid;
-		});
-		*/
 		setValues(copyValues);
-		//setCheckFormValid(isFormValid);
 	};
 
 	const renderInputs = () => {
@@ -130,17 +130,40 @@ export const Form = (): JSX.Element => {
 		});
 	};
 
+	const renderMessages = (mess: string, status: boolean) => {
+		setMessage({ text: mess, status });
+		setTimeout(() => {
+			setMessage({ text: '', status: false });
+		}, 4000);
+	};
+
+	const clearInputs = () => {
+		const copyState = { ...values };
+		Object.keys(copyState).forEach((name) => {
+			copyState[name].value = '';
+		});
+		setValues(copyState);
+	};
+
 	return (
 		<div className={styles.form_contaner}>
-			<form onSubmit={handleSubmit}>
+			<form onSubmit={handleSubmit} noValidate>
 				{renderInputs()}
 				<div>
 					<button disabled={loading ? true : false} className={styles.btn}>
-						Submit
+						{!loading ? 'Submit' : 'Loading...'}
 					</button>
 				</div>
 			</form>
-			<div className={styles.message}>Форма отправлена успешно!</div>
+			<div
+				className={styles.message}
+				style={{
+					display: message ? 'block' : 'none',
+					color: !message['status'] ? 'red' : 'green',
+				}}
+			>
+				{message['text']}
+			</div>
 		</div>
 	);
 };

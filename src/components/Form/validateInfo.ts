@@ -1,10 +1,8 @@
-import { ChangeEvent } from 'react';
-import InputMask from 'react-input-mask';
-
 const rule = {
 	validName: /^([A-Z-А-ЯЁ]){3,30}\s{1}([A-Z-А-ЯЁ|\-]){3,30}$/,
 	validEmail: /^([a-z0-9_\.-]+)@([a-z0-9_\.-]+)\.([a-z\.]{2,6})$/,
 	validBirthday: /^(\d{4}\-\d{2}\-\d{2})$/,
+	validPhone: /^\+?(\d)(\()(\d{3})(\))(\d{7})$/,
 };
 
 export const isValid = (value: string, inputName: string): boolean => {
@@ -20,7 +18,7 @@ export const isValid = (value: string, inputName: string): boolean => {
 			case 'message':
 				return !(value.length > 9 && value.length < 301);
 			case 'telephone':
-				return false;
+				return !rule.validPhone.test(value);
 			case 'birthday':
 				return !rule.validBirthday.test(value);
 		}
@@ -30,41 +28,34 @@ export const isValid = (value: string, inputName: string): boolean => {
 	}
 };
 
-const checkName = (val: string): boolean => {
-	let result = false;
-	const str = val.trim();
-	const newStr = str.split(' ');
-	if (newStr.length !== 2) {
-		return true;
+const clearOnLetters = (val: string) => {
+	return val.replace(/(\D)g/, '');
+};
+
+export const currencyMask = (value: string) => {
+	let inputVal = clearOnLetters(value);
+	if (!inputVal) {
+		return (inputVal = '');
 	}
-	const first = newStr[0][newStr.length];
-	const second = newStr[1][0];
-	if (first === ' ' || second === ' ') {
-		result = true;
-	}
-	newStr.forEach((item) => {
-		if (item.length < 3 || item.length > 31) {
-			result = true;
+
+	return strClear(inputVal);
+};
+
+function strClear(str: string) {
+	let newStr = '';
+	for (let i = 0; i < str.length; i++) {
+		if (i === 0) {
+			newStr += '+';
+		} else if (!['7', '8', '9'].includes(str[1])) {
+			newStr += '7';
+		} else if (i === 2) {
+			newStr += '(';
+		} else if (i === 6) {
+			newStr += ')';
+		} else {
+			newStr += str[i];
 		}
-	});
-	return result;
-};
+	}
 
-export const currencyMask = (e: ChangeEvent<HTMLInputElement>) => {
-	e.target.maxLength = 16;
-	let value = e.target.value;
-	value = value.replace(/\D/g, '');
-	value = value.replace(/(\d)(\d{2})$/, '$1. $2');
-	value = value.replace(/(?=(\d{3})+(\D))\B/g, ',');
-	e.target.value = value;
-	console.log('popali>>', e.target.value);
-	return e;
-};
-
-export const phoneMask = () => {
-	const firstLetter: any = /(?!.*[DFIOQU])[A-VXY]/i;
-	const letter: any = /(?!.*[DFIOQU])[A-Z]/i;
-	const digit: any = /[0-9]/;
-	const mask: any = [firstLetter, digit, letter, ' ', digit, letter, digit];
-	//	return 	<InputMask mask={mask} />
-};
+	return newStr;
+}

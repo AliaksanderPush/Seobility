@@ -1,18 +1,13 @@
 import React from 'react';
 import { currencyMask } from '../../Form/validateInfo';
 import { IProps } from './Input.props';
-import InputMask from 'react-input-mask';
 import styles from './Input.styles.scss';
 
 export const Input = (props: IProps) => {
 	const { inputName, onChange } = props;
 	const { label, errorMessage, placeholder, name, value, touched, valide, type } = inputName;
 
-	let offEmail = name === 'email';
-
-	if (name === 'birthday') {
-		//console.log('birsd>>', touched, valide);
-	}
+	let phone = name === 'telephone';
 
 	return (
 		<div className={styles.form_input}>
@@ -23,7 +18,12 @@ export const Input = (props: IProps) => {
 				style={{ border: touched && valide ? '1px solid red' : 'none' }}
 				placeholder={placeholder}
 				name={name}
-				onChange={(e) => onChange(e, inputName.name)}
+				maxLength={phone ? 14 : 300}
+				onChange={
+					phone
+						? (e) => onChange(currencyMask(e.target.value), name)
+						: (e) => onChange(e.target.value, name)
+				}
 				value={value}
 			/>
 			{touched && valide ? <span>{errorMessage}</span> : null}

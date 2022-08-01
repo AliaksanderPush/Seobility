@@ -4,15 +4,15 @@ $var2: #fff;
 .footer {
 	margin-top: auto;
 	background: $var1;
-	color: white;
+	color: $var2;
 	height: 58px;
 	text-align: center;
 	.footer_item {
 		background: $var1;
-		color: white;
+		color: $var2;
 		line-height: 58px;
 	}
 	.footer_item a {
-		color: white;
+		color: $var2;
 	}
 }

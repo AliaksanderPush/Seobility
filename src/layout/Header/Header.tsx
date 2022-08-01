@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './Header.styles.scss';
 
-export const Header = () => {
+export const Header = (): JSX.Element => {
 	return (
 		<>
 			<div className={styles.header_container}>
